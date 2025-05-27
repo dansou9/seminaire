@@ -9,6 +9,10 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\InformationController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PresentationController;
+use App\Http\Controllers\EnseignantController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -36,6 +40,48 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    //Route about information
+    Route::get('/information', [InformationController::class, 'index'])
+        ->name('information.page');
+
+    Route::post('/information', [InformationController::class, 'store'])
+        ->name('information.store');
+
+    //Route about users
+    Route::get('/users', [UserController::class, 'index'])
+        ->name('users.index');
+    
+    //Route about presentation
+    Route::get('/presentation', [PresentationController::class, 'index'])
+        ->name('presentation.page');
+
+    Route::get('/presentation-view', [PresentationController::class, 'create'])
+        ->name('presentation.create');
+
+    Route::post('/presentation-store', [PresentationController::class, 'store'])
+        ->name('presentation.store');
+
+    Route::get('/presentation/{id}', [PresentationController::class, 'edit'])
+        ->name('presentation.edit');
+
+    Route::put('/presentation/{id}', [PresentationController::class, 'update'])
+        ->name('presentation.update');
+
+    Route::get('/presentation/passed', [PresentationController::class, 'index_passed'])
+        ->name('presentation.index_all_passed');
+
+    Route::get('/presentation/not-passed', [PresentationController::class, 'index_not_passed'])
+        ->name('presentation.index_all_not_passed');
+
+    //Route about seminaire
+    Route::get('/seminaire/{id}', [PresentationController::class, 'create_seminaire'])
+        ->name('presentation.create_seminaire');
+
+    //Route about register enseignant
+    Route::get('/register-enseignant', [EnseignantController::class, 'store'])
+        ->name('register-enseignant.store');
+
+    //Other
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
