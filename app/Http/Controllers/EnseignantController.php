@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class EnseignantController extends Controller
 {
@@ -16,7 +17,14 @@ class EnseignantController extends Controller
      */
     public function index()
     {
-        //
+
+        $enseignantRoleId = Role::where('nom', 'Enseignant')->value('id');
+        $enseignants = User::where('role_id', $enseignantRoleId)->get();
+        if ($enseignants->isNotEmpty()) {
+            return view('enseignants.index', compact('enseignants'));
+        }
+
+        return view('enseignants.index');
     }
 
     /**
@@ -33,10 +41,10 @@ class EnseignantController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-               'name' => ['required', 'string', 'max:255'],
-               'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique'.User::class],
-               'specialite' => ['required', 'string'], 
-            ]);
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')],
+            'specialite' => ['required', 'string'],
+        ]);
         $role_id = Role::where('nom', 'Enseignant')->first();
         $random_password = Str::random(10);
 
@@ -46,6 +54,8 @@ class EnseignantController extends Controller
         $user = User::create($validated);
 
         Password::sendResetLink(['email' => $user->email]);
+
+        return back()->with('success', 'Enseignant ajouté avec succès. Un lien de création de mot de passe a été envoyé par email.');
     }
 
     /**

@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
@@ -13,9 +13,30 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Accueil') }}
                     </x-nav-link>
                 </div>
+
+                @if(auth()->user()->hasAnyRole([1,2]) || auth()->user()->isDoctorant() )
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href=" route('presentation.page')" :active="request()->routeIs('dashboard')">
+                        {{ __('Présentations') }}
+                    </x-nav-link>
+                </div>
+                @endif
+
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('seminaires.index')" :active="request()->routeIs('dashboard')">
+                        {{ __('Séminaires') }}
+                    </x-nav-link>
+                </div>
+                @if(auth()->user()->hasAnyRole([1]))
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('enseignants.index')" :active="request()->routeIs('dashboard')">
+                        {{ __('Enseignants') }}
+                    </x-nav-link>
+                </div>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->

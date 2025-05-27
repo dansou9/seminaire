@@ -37,7 +37,7 @@ class AlertePresentationAccepted extends Notification
         return (new MailMessage)
             ->subject("Votre présentation est acceptée")
             ->greeting("Bonjour", $notifiable->name)
-            ->line('Vous recevez ce message pour vous notifier que présentation à été accepter et que la programmation sera faite bientôt')
+            ->line('Vous recevez ce message pour vous notifier que votre présentation à été acceptée et que la programmation sera faite bientôt')
             ->line("Merci pour l'utilisation de notre application");
     }
 

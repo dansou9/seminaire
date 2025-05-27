@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
+        'specialite',
+        'degree',
     ];
 
     /**
@@ -38,9 +41,88 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function hasAnyRole(array $roleIds): bool
+    // public function hasRole($roleId): bool
+    // {
+    //     return $this->hasAnyRole([$roleId]);
+    // }
+
+    public function hasRole($role): bool
     {
-        return in_array($this->role_id, $roleIds);
+        // Cas où on passe un identifiant numérique
+        if (is_int($role)) {
+            // On considère ici que "4" est utilisé comme identifiant virtuel pour "étudiant doctorant"
+            if ($role === 4) {
+                return $this->hasVirtualRole('etudiant_doctorant');
+            }
+            return $this->role_id === $role;
+        }
+
+        // Cas où on passe un nom de rôle (chaîne de caractères)
+        return $this->hasVirtualRole($role);
+    }
+
+
+    public function hasVirtualRole($virtualRole): bool
+    {
+        return match ($virtualRole) {
+            'etudiant_doctorant' => $this->role_id == 2 &&
+                !empty($this->degree) &&
+                strcasecmp($this->degree, 'doctorat') === 0,
+            default => false,
+        };
+    }
+
+
+
+    // public function hasAnyRole(array $roleIds): bool
+    // {
+    //     // Rôles simples (role_id dans tableau)
+    //     if (in_array($this->role_id, $roleIds)) {
+    //         return true;
+    //     }
+
+    //     // Cas spécial : rôle 4 = étudiant doctorant
+    //     if (in_array(4, $roleIds)) {
+    //         // On suppose que le rôle "Étudiant" a role_id = 2 par exemple
+    //         if ($this->role_id == 2 && strtolower($this->degree) === 'doctorat') {
+    //             return true;
+    //         }
+    //     }
+
+    //     return false;
+    // }
+
+    // Vérifie si l'utilisateur possède au moins un des rôles passés dans le tableau
+    public function hasAnyRole(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public function isDoctorant(): bool
+    {
+        return $this->role_id == 3 && strcasecmp($this->degree, 'doctorat') === 0;
+    }
+
+
+    public function hasAccessToPresentation(): bool
+    {
+        return $this->hasRole(1) || $this->hasRole(2) || $this->isDoctorant();
+    }
+
+
+
+
+
+
+    public function presentations()
+    {
+        return $this->hasMany(Presentation::class);
     }
 
     /**

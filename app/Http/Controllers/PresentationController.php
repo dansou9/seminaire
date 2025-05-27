@@ -1,114 +1,170 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Presentation;
 use App\Models\User;
 use App\Notifications\AlertePresentationAccepted;
+use App\Notifications\AlertePresentationScheduled;
+
 use Illuminate\Http\Request;
 
 class PresentationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $presentations = Presentation::all();
+        $user = Auth::user();
+
+        if ($user->hasRole('Enseignant')) {
+            // Enseignant : seulement ses présentations
+            $presentations = Presentation::with('user')
+                ->where('user_id', $user->id)
+                ->get();
+        } else if ($user->hasRole('Etudiant') && $user->degree === 'doctorat') {
+            // Étudiant doctorant : seulement ses présentations
+            $presentations = Presentation::with('user')
+                ->where('user_id', $user->id)
+                ->get();
+        } else {
+            // Autres rôles : toutes les présentations
+            $presentations = Presentation::with('user')->get();
+        }
+
         return view('presentation.index', compact('presentations'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('presentation.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $valited = $request->validate([
-               'titre' => 'required|string|max:255',
-               'resume' => 'required',
-               'pdf_file' => 'required|file|mimes:pdf|max:2048' 
-            ]);
+        $validated = $request->validate([
+            'titre' => 'required|string|max:255',
+            'resume' => 'required',
+            'pdf_file' => 'required|file|mimes:pdf|max:2048'
+        ]);
 
         $path = $request->file('pdf_file')->store('presentation', 'public');
-        $valited['pdf_file_path'] = $path;
-        $valited['user_id'] = auth()->id;
+        $validated['pdf_file_path'] = $path;
 
-        Presentation::create($valited);
+        $validated['user_id'] = auth()->user()->id;
 
-        return redirect()->back()->with('sucess', 'Présentation ajouté avec succès');
+        Presentation::create($validated);
+
+        return redirect()->back()->with('success', 'Présentation ajoutée avec succès');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Presentation $presentation)
+    public function showValidation($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $presentation = Presentation::findOrFail($id);
+        $presentation = Presentation::with('user')->findOrFail($id);
         return view('presentation.show', compact('presentation'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update($id)
     {
         $presentation = Presentation::findOrFail($id);
         $presentation->etat = true;
         $presentation->save();
+
         $user = User::findOrFail($presentation->user_id);
         $user->notify(new AlertePresentationAccepted());
 
-        return redirect()->route('presentation.index')->with('success', 'Presentation validée avec succès');
+        return redirect()->route('presentation.page')->with('success', 'Présentation validée avec succès');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Presentation $presentation)
+    public function index_validated()
     {
-        //
+        $presentations = Presentation::with('user')
+            ->where('etat', true)
+            ->get();
+
+        return view('presentation.index_validated', compact('presentations'));
     }
 
-    
-    public function index_passed()
+    public function index_not_validated()
     {
-        $all_presentations_passed = Presentation::where('etat', true)->get();
-        return view('presentation.index_passed', compact('all_presentations_passed '));
+        $presentations = Presentation::with('user')
+            ->where('etat', false)
+            ->get();
+
+        return view('presentation.index_not_validated', compact('presentations'));
     }
 
-    public function index_not_passed()
+    public function showProgram($id)
     {
-        $all_presentations_not_passed = Presentation::where('etat', false)->get();
-        return view('presentation.index_passed', compact('all_presentations_not_passed '));
+        $presentation = Presentation::findOrFail($id);
+        return view('presentation.program', compact('presentation'));
     }
 
-    public function create_seminaire($id, Request $request)
+    public function storeProgram(Request $request, $id)
     {
-        $valited = $request->validate([
-               'date_evenement' => 'required|date',
-            ]);
+        $validated = $request->validate([
+            'date_evenement' => 'required|date',
+        ]);
 
         $presentation = Presentation::findOrFail($id);
-
-        $presentation->date_evenement = $valited['date_evenement'];
+        $presentation->date_evenement = $validated['date_evenement'];
         $presentation->save();
 
-        return redirect()->back()->with('sucess', 'Date de présentation mis à jour avec succès');
+        $user = User::findOrFail($presentation->user_id);
+        $user->notify(new AlertePresentationScheduled());
+
+        return redirect()->route('presentation.page')->with('success', 'Date de présentation mise à jour avec succès');
+    }
+
+
+    public function editProgram($id)
+    {
+        $presentation = Presentation::findOrFail($id);
+        return view('presentation.program', compact('presentation'));
+    }
+
+    public function updateProgram(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'date_evenement' => 'required|date|after:today',
+        ]);
+
+        $presentation = Presentation::findOrFail($id);
+        $presentation->date_evenement = $validated['date_evenement'];
+        $presentation->save();
+
+        return redirect()->route('presentation.page')->with('success', 'Date programmée avec succès.');
+    }
+
+    public function seminaires()
+    {
+        $today = Carbon::today();
+
+        $seminairesDuJour = Presentation::with('user')
+            ->whereDate('date_evenement', $today)
+            ->get();
+
+        $seminairesAVenir = Presentation::with('user')
+            ->whereDate('date_evenement', '>', $today)
+            ->orderBy('date_evenement')
+            ->get();
+
+        $seminairesPasses = Presentation::with('user')
+            ->whereDate('date_evenement', '<', $today)
+            ->orderByDesc('date_evenement')
+            ->get();
+
+        return view('presentation.seminaires', compact(
+            'seminairesDuJour',
+            'seminairesAVenir',
+            'seminairesPasses'
+        ));
+    }
+
+
+    public function showSoumissionPage()
+    {
+        return view('presentation.soumettre');
     }
 }

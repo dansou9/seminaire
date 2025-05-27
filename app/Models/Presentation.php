@@ -13,6 +13,17 @@ class Presentation extends Model
         'titre',
         'date_evenement',
         'resume',
-        'etat'
+        'etat',
+        'pdf_file_path',
+        'user_id',
     ];
+
+    protected $casts = [
+        'date_evenement' => 'datetime', // <--- Ajoute cette ligne
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -50,8 +50,14 @@ Route::middleware('auth')->group(function () {
     //Route about users
     Route::get('/users', [UserController::class, 'index'])
         ->name('users.index');
-    
+
+
+
     //Route about presentation
+    Route::get('/soumission', [PresentationController::class, 'showSoumissionPage'])
+        ->name('presentation.soumission');
+
+
     Route::get('/presentation', [PresentationController::class, 'index'])
         ->name('presentation.page');
 
@@ -73,13 +79,43 @@ Route::middleware('auth')->group(function () {
     Route::get('/presentation/not-passed', [PresentationController::class, 'index_not_passed'])
         ->name('presentation.index_all_not_passed');
 
+    // Voir pour valider
+    Route::get('/presentation/show/{id}', [PresentationController::class, 'showValidation'])
+        ->name('presentation.showValidation');
+
+    // Programmer / Modifier date
+    Route::get('/presentation/programmer/{id}', [PresentationController::class, 'showProgram'])
+        ->name('presentation.programmer');
+
+    Route::post('/presentation/programmer/{id}', [PresentationController::class, 'storeProgram'])
+        ->name('presentation.programmer.store');
+
+    // Afficher le formulaire pour programmer ou modifier la date
+    Route::get('/presentation/programmer/{id}/edit', [PresentationController::class, 'editProgram'])
+        ->name('presentation.programmer.edit');
+
+    // Mettre à jour la date (PUT)
+    Route::put('/presentation/programmer/{id}', [PresentationController::class, 'updateProgram'])
+        ->name('presentation.programmer.update');
+
+
+
     //Route about seminaire
     Route::get('/seminaire/{id}', [PresentationController::class, 'create_seminaire'])
         ->name('presentation.create_seminaire');
 
+    Route::get('/seminaires', [PresentationController::class, 'seminaires'])->name('seminaires.index');
+
+
     //Route about register enseignant
-    Route::get('/register-enseignant', [EnseignantController::class, 'store'])
+    Route::post('/register-enseignant', [EnseignantController::class, 'store'])
         ->name('register-enseignant.store');
+
+    Route::get('/enseignants-store', [EnseignantController::class, 'create'])
+        ->name('enseignants.create');
+
+    Route::get('/enseignants', [EnseignantController::class, 'index'])
+        ->name('enseignants.index');
 
     //Other
     Route::get('verify-email', EmailVerificationPromptController::class)

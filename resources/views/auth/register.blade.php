@@ -16,6 +16,18 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- Degree -->
+        <div class="mt-4">
+            <x-input-label for="degree" :value="__('Niveau étude')" />
+            
+            <select id="degree" name="degree" class="block mt-1 w-full" required>
+                <option value="licence">Licence</option>
+                <option value="master">Master</option>
+                <option value="doctorat">Doctorat</option>
+            </select>
+        </div>
+
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
