@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Presentation;
 use App\Models\User;
 use App\Notifications\AlertePresentationAccepted;
+use App\Notifications\AlertePresentationNotAccepted;
 use App\Notifications\AlertePresentationScheduled;
 
 use Illuminate\Http\Request;
@@ -65,15 +66,19 @@ class PresentationController extends Controller
         return view('presentation.show', compact('presentation'));
     }
 
-    public function update($id)
+    public function update($id, $etat)
     {
         $presentation = Presentation::findOrFail($id);
+        $user = User::findOrFail($presentation->user_id);
+
+        if(!$etat) {
+            $user->notify(new AlertePresentationNotAccepted());
+            return redirect()->route('presentation.page')->with('success', 'Présentation non validée avec succès');
+        }
+
         $presentation->etat = true;
         $presentation->save();
-
-        $user = User::findOrFail($presentation->user_id);
         $user->notify(new AlertePresentationAccepted());
-
         return redirect()->route('presentation.page')->with('success', 'Présentation validée avec succès');
     }
 
