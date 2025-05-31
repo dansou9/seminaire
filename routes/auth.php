@@ -70,7 +70,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/presentation/{id}', [PresentationController::class, 'edit'])
         ->name('presentation.edit');
 
-    Route::put('/presentation/{id}', [PresentationController::class, 'update'])
+    // Ajout du second paramètre etat (nouveau)
+    Route::put('/presentation/{id}/{etat}', [PresentationController::class, 'update'])
         ->name('presentation.update');
 
     Route::get('/presentation/passed', [PresentationController::class, 'index_passed'])
