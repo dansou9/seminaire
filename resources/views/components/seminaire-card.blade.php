@@ -18,7 +18,7 @@
     $date = Carbon::parse($seminaire->date_evenement)->locale('fr')->isoFormat('dddd D MMMM YYYY');
 @endphp
 
-<div class="flex flex-col border-l-4 {{ $color }} bg-white shadow-md rounded-2xl p-5 h-full hover:shadow-xl transition">
+<div class="flex flex-col border-l-4 {{ $color }} bg-white shadow-md rounded-2xl p-5 h-full" hover:shadow-xl transition">
     {{-- Titre --}}
     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ $seminaire->titre }}</h4>
     {{-- Résumé --}}

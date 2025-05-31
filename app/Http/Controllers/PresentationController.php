@@ -141,17 +141,14 @@ class PresentationController extends Controller
     {
         $today = Carbon::today();
 
-        $seminairesDuJour = Presentation::with('user')
-            ->whereDate('date_evenement', $today)
+        $seminairesDuJour = Presentation::whereDate('date_evenement', $today)
             ->get();
 
-        $seminairesAVenir = Presentation::with('user')
-            ->whereDate('date_evenement', '>', $today)
+        $seminairesAVenir = Presentation::whereDate('date_evenement', '>', $today)
             ->orderBy('date_evenement')
             ->get();
 
-        $seminairesPasses = Presentation::with('user')
-            ->whereDate('date_evenement', '<', $today)
+        $seminairesPasses = Presentation::whereDate('date_evenement', '<', $today)
             ->orderByDesc('date_evenement')
             ->get();
 
