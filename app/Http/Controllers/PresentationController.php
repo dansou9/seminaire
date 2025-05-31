@@ -66,6 +66,7 @@ class PresentationController extends Controller
         return view('presentation.show', compact('presentation'));
     }
 
+    // Mis à jour effectué dans cette fonction (nouveau)
     public function update($id, $etat)
     {
         $presentation = Presentation::findOrFail($id);
