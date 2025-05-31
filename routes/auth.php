@@ -70,9 +70,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/presentation/{id}', [PresentationController::class, 'edit'])
         ->name('presentation.edit');
 
-    // Ajout du second paramètre etat (nouveau)
-    Route::put('/presentation/{id}/{etat}', [PresentationController::class, 'update'])
+    // Suppression du paramètre etat (nouveau)
+    Route::put('/presentation/{id}', [PresentationController::class, 'update'])
         ->name('presentation.update');
+
+    //Ajout de la nouvelle route
+    Route::put('/presentation-refused/{id}', [PresentationController::class, 'updateToRefused'])
+        ->name('presentation.refused');
 
     Route::get('/presentation/passed', [PresentationController::class, 'index_passed'])
         ->name('presentation.index_all_passed');

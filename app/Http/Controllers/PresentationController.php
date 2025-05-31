@@ -66,21 +66,31 @@ class PresentationController extends Controller
         return view('presentation.show', compact('presentation'));
     }
 
-    // Mis à jour effectué dans cette fonction (nouveau)
-    public function update($id, $etat)
+    public function update($id)
     {
         $presentation = Presentation::findOrFail($id);
         $user = User::findOrFail($presentation->user_id);
 
-        if(!$etat) {
-            $user->notify(new AlertePresentationNotAccepted());
-            return redirect()->route('presentation.page')->with('success', 'Présentation non validée avec succès');
-        }
-
         $presentation->etat = true;
         $presentation->save();
+
         $user->notify(new AlertePresentationAccepted());
+
         return redirect()->route('presentation.page')->with('success', 'Présentation validée avec succès');
+    }
+
+    // Ajout de la nouvelle méthode
+    public function updateToRefused($id)
+    {
+        $presentation = Presentation::findOrFail($id);
+        $user = User::findOrFail($presentation->user_id);
+
+        $presentation->refused = true;
+        $presentation->save();
+
+        $user->notify(new AlertePresentationNotAccepted());
+
+        return redirect()->route('presentation.page')->with('success', 'Présentation invalidée avec succès');
     }
 
     public function index_validated()
