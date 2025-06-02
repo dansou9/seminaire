@@ -44,6 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/information', [InformationController::class, 'index'])
         ->name('information.page');
 
+    Route::get('/information-view', [InformationController::class, 'create'])
+        ->name('information.create');
+
     Route::post('/information', [InformationController::class, 'store'])
         ->name('information.store');
 

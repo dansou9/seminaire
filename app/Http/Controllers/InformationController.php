@@ -19,7 +19,10 @@ class InformationController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request) {}
+    public function create(Request $request)
+    {
+        return view('information.create');
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -27,7 +30,7 @@ class InformationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'information' => 'required|string',
+            'texte' => 'required|string',
         ]);
 
         Information::create([

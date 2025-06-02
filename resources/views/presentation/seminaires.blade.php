@@ -33,16 +33,16 @@
         @if($seminairesPasses->count())
             <div>
                 <h3 class="text-xl font-semibold text-gray-600 mb-4">⏱ Séminaires passés</h3>
-                @if($seminairesAVenir->count() === 1)
+                @if($seminairesPasses->count() === 1)
                 <div class="flex justify-center">
                     <div class="w-full max-w-md">
-                        <x-seminaire-card :seminaire="$seminaire" type="future" />
+                        <x-seminaire-card :seminaire="$seminaire" type="past" />
                     </div>
                 </div>
                 @else
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($seminairesAVenir as $seminaire)
-                            <x-seminaire-card :seminaire="$seminaire" type="future" />
+                        @foreach($seminairesPasses as $seminaire)
+                            <x-seminaire-card :seminaire="$seminaire" type="past" />
                         @endforeach
                     </div>
                 @endif

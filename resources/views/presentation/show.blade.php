@@ -35,8 +35,18 @@
                         </button>
                     </form>
 
+                    <form action="{{ route('presentation.refused', $presentation->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <button type="submit" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                            Refuser
+                        </button>
+                    </form>
+
+
                     <a href="{{ route('presentation.page') }}" 
-                       class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                       class="bg-pink-600 hover:bg-red-700 text-white px-4 py-2 rounded">
                         Annuler
                     </a>
                 </div>

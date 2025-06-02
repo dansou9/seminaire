@@ -22,11 +22,11 @@
         @endif
         
        
-        {{-- Table 1 : Présentations non validées --}}
+        {{-- Table 1 : Présentations en attente --}}
         <div class="mb-12 bg-white p-6 shadow sm:rounded-lg">
-            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations non validées</h3>
+            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations en attente de validation</h3>
             <table class="w-full table-auto border-collapse border border-gray-300">
-                <thead class="bg-red-100">
+                <thead class="bg-yellow-100">
                     <tr>
                         <th class="border px-4 py-2">Titre</th>
                         <th class="border px-4 py-2">Résumé</th>
@@ -37,13 +37,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($presentations->where('etat', false) as $presentation)
+                    @forelse ($presentations->where('etat', false)->where('refused', false) as $presentation)
                         <tr>
                             <td class="border px-4 py-2">{{ $presentation->titre }}</td>
                             <td class="border px-4 py-2">{{ $presentation->resume }}</td>
                             <td class="border px-4 py-2">{{ $presentation->user->name ?? 'N/A' }}</td>
                             <td class="border px-4 py-2">{{ $presentation->date_evenement ?? 'Non programmé' }}</td>
-                            <td class="border px-4 py-2 text-center text-red-600 font-semibold">Non validée</td>
+                            <td class="border px-4 py-2 text-center text-red-600 font-semibold">En attente</td>
                             <td class="border px-4 py-2 text-center space-x-2">
                                 <a href="{{ route('presentation.showValidation', $presentation->id) }}"
                                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Voir</a>
@@ -98,10 +98,17 @@
                             </td>
                             <td class="border px-4 py-2 text-center">
                                 @if ($presentation->date_evenement)
-                                    <a href="{{ route('presentation.programmer.edit', $presentation->id) }}"
-                                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
-                                        Modifier la date
-                                    </a>
+                                    @php
+                                        $dateEvenement = \Carbon\Carbon::parse($presentation->date_evenement);
+                                        $deuxJoursPasse = $dateEvenement->isPast() && $dateEvenement->diffInDays(now()) > 2;
+                                    @endphp
+
+                                    @if (!$deuxJoursPasse)
+                                        <a href="{{ route('presentation.programmer.edit', $presentation->id) }}"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
+                                            Modifier la date
+                                        </a>
+                                    @endif
                                 @else
                                     <a href="{{ route('presentation.programmer', $presentation->id) }}"
                                        class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded">
@@ -117,6 +124,39 @@
             </table>
         </div>
 
+        {{-- Table 3 : Présentations non validées --}}
+        <div class="mb-12 bg-white p-6 shadow sm:rounded-lg">
+            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations non validées</h3>
+            <table class="w-full table-auto border-collapse border border-gray-300">
+                <thead class="bg-red-100">
+                    <tr>
+                        <th class="border px-4 py-2">Titre</th>
+                        <th class="border px-4 py-2">Résumé</th>
+                        <th class="border px-4 py-2">Présentateur</th>
+                        <th class="border px-4 py-2">Date</th>
+                        <th class="border px-4 py-2">Validation</th>
+                        {{-- <th class="border px-4 py-2">Actions</th> --}}
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($presentations->where('etat', false)->where('refused', true) as $presentation)
+                        <tr>
+                            <td class="border px-4 py-2">{{ $presentation->titre }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->resume }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->user->name ?? 'N/A' }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->date_evenement ?? 'Non programmé' }}</td>
+                            <td class="border px-4 py-2 text-center text-red-600 font-semibold">Non validée</td>
+                            {{-- <td class="border px-4 py-2 text-center space-x-2">
+                                <a href="{{ route('presentation.showValidation', $presentation->id) }}"
+                                   class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Voir</a>
+                            </td> --}}
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="text-center py-4">Aucune présentation à valider.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
         
     </div>
 </x-app-layout>
@@ -147,11 +187,11 @@
         @endif
         
        
-        {{-- Table  : Présentations  --}}
+        {{-- Table  : Présentations validées  --}}
         <div class="mb-12 bg-white p-6 shadow sm:rounded-lg">
-            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations non validées</h3>
+            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations validées</h3>
             <table class="w-full table-auto border-collapse border border-gray-300">
-                <thead class="bg-blue-100">
+                <thead class="bg-green-100">
                     <tr>
                         <th class="border px-4 py-2">Titre</th>
                         <th class="border px-4 py-2">Résumé</th>
@@ -194,7 +234,41 @@
                         </tr>
                     @endif
                     @empty
-                        <tr><td colspan="6" class="text-center py-4">Aucune présentation à valider.</td></tr>
+                        <tr><td colspan="6" class="text-center py-4">Aucune présentation.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Table  : Présentations non validées  --}}
+        <div class="mb-12 bg-white p-6 shadow sm:rounded-lg">
+            <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations non validées</h3>
+            <table class="w-full table-auto border-collapse border border-gray-300">
+                <thead class="bg-red-100">
+                    <tr>
+                        <th class="border px-4 py-2">Titre</th>
+                        <th class="border px-4 py-2">Résumé</th>
+                        <th class="border px-4 py-2">Présentateur</th>
+                        <th class="border px-4 py-2">Date</th>
+                        <th class="border px-4 py-2">Validation</th>
+                        {{-- <th class="border px-4 py-2">Actions</th> --}}
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($presentations->where('etat', false)->where('refused', true) as $presentation)
+                        <tr>
+                            <td class="border px-4 py-2">{{ $presentation->titre }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->resume }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->user->name ?? 'N/A' }}</td>
+                            <td class="border px-4 py-2">{{ $presentation->date_evenement ?? 'Non programmé' }}</td>
+                            <td class="border px-4 py-2 text-center text-red-600 font-semibold">Non validée</td>
+                            {{-- <td class="border px-4 py-2 text-center space-x-2">
+                                <a href="{{ route('presentation.showValidation', $presentation->id) }}"
+                                   class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Voir</a>
+                            </td> --}}
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="text-center py-4">Aucune présentation non validée.</td></tr>
                     @endforelse
                 </tbody>
             </table>

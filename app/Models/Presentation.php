@@ -16,6 +16,7 @@ class Presentation extends Model
         'etat',
         'pdf_file_path',
         'user_id',
+        'refused',
     ];
 
     protected $casts = [
