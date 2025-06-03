@@ -57,7 +57,7 @@
         </div>
 
         {{-- Table 2 : Présentations validées --}}
-        <div class="bg-white p-6 shadow sm:rounded-lg">
+        <div class="mb-12 bg-white p-6 shadow sm:rounded-lg">
             <h3 class="text-lg font-bold text-gray-700 mb-4">Présentations validées</h3>
             <table class="w-full table-auto border-collapse border border-gray-300">
                 <thead class="bg-green-100">
